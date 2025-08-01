@@ -1,15 +1,19 @@
 import React, { useRef, useState } from 'react';
 import Header from './Header';
 import {CheckValidData} from '../utils/validate';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {auth} from "../utils/firebase";
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
 
 const Login = () => {
     const [isSignInForm, setIsSignInForm] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
+    const dispatch = useDispatch();
 
     const email = useRef(null);
     const password = useRef(null);
+    const name = useRef(null);
 
     const toggleSignInForm = () => {  
         setIsSignInForm(!isSignInForm);
@@ -29,7 +33,16 @@ const Login = () => {
                 .then((userCredential) => {
                     // Signed up 
                     const user = userCredential.user;
-                    console.log(user);
+                    //Update a user's profile
+                    updateProfile(user, {
+                        displayName: name.current.value, photoURL: "https://example.com/jane-q-user/profile.jpg"
+                        }).then(() => {
+                        // Profile updated!
+                        const {uid, email, displayName, photoURL} = auth.currentUser;
+                        dispatch(addUser({uid: uid, email: email, displayName: displayName, photoURL}));
+                        }).catch((error) => {
+                            setErrorMessage(error.message);
+                        });
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -43,7 +56,6 @@ const Login = () => {
                 .then((userCredential) => {
                     // Signed in 
                     const user = userCredential.user;
-                    console.log(user);
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -63,7 +75,7 @@ const Login = () => {
             <h1 className='font-bold text-3xl pb-4'>
                 {isSignInForm ? "Sign In" : "Sign Up"}
             </h1>
-            {!isSignInForm && <input className='bg-[#1f1f1f] rounded-sm p-3 my-2 text-white w-full ' 
+            {!isSignInForm && <input ref={name} className='bg-[#1f1f1f] rounded-sm p-3 my-2 text-white w-full ' 
                    type="text" 
                    placeholder='Full name' 
             />}

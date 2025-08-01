@@ -1,11 +1,19 @@
-import React from 'react'
+import Header from './Header';
+import useNowPlayingMovies from "../hooks/useNowPlayingMovies";
+import MainContainer from './MainContainer';
+import SecondaryContainer from './SecondaryContainer';
 
 const Browse = () => {
+  
+  useNowPlayingMovies(); //fetch data from TMDB API and update redux store
+
   return (
     <div>
-      <h1>browse</h1>
+      <Header/>
+      <MainContainer/>
+      <SecondaryContainer/>
     </div>
   )
 }
 
-export default Browse
+export default Browse;
